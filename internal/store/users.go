@@ -1,10 +1,11 @@
 package store
- 
+
 import (
-  "crypto/rand"
-  "time"
- 
-  "golang.org/x/crypto/bcrypt"
+	"crypto/rand"
+	"time"
+
+	"github.com/rs/zerolog/log"
+	"golang.org/x/crypto/bcrypt"
 )
  
 type User struct {
@@ -57,4 +58,16 @@ func GenerateSalt() ([]byte, error) {
     return nil, err
   }
   return salt, nil
+}
+
+// fetch user from database based on its ID
+func FetchUser(id int) (*User, error) {
+  user := new(User)
+  user.ID = id
+  err := db.Model(user).Returning("*").WherePK().Select()
+  if err != nil {
+    log.Error().Err(err).Msg("Error fetching user")
+    return nil, err
+  }
+  return user, nil
 }
